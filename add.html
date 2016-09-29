@@ -1,0 +1,114 @@
+<!doctype html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<link href="css/mui.min.css" rel="stylesheet" />
+		<link href="css/mui.picker.css" rel="stylesheet" />
+		<link href="css/mui.poppicker.css" rel="stylesheet" />
+	</head>
+
+	<body>
+		<header class="mui-bar mui-bar-nav">
+		    <a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>
+		    <h1 class="mui-title">入库</h1>
+		</header>
+		<div class="mui-content">
+			<div id="slider" class="mui-slider mui-fullscreen">
+			    <div class="mui-slider-indicator mui-segmented-control mui-segmented-control-inverted">
+			        <a class="mui-control-item mui-active" href="#computer">机器</a>
+			        <a class="mui-control-item" href="#parts">配件</a>
+			    </div>
+			    <div id="sliderProgressBar" class="mui-slider-progress-bar mui-col-xs-6"></div>
+			    <div id="content-group" class="mui-slider-group">
+			        <div id="computer" class="mui-slider-item mui-control-content mui-active">
+			        		<div id="computer-content" style="overflow-y: auto;">
+			        			
+			        		</div>
+			        </div>
+			        <div id="parts" class="mui-slider-item mui-control-content">
+			        		<div id="parts-content" class="mui-card mui-table-view-cell" style="overflow-y: auto;">
+			        			<input id="type" readonly="readonly" placeholder="选择配件类型"/>
+			        			<input id="type-value" readonly="readonly" style="display: none;"/>
+			        			<input id="model" readonly="readonly" placeholder="选择型号"/>
+			        			<input id="model-value" readonly="readonly" style="display: none;"/>
+			        			<div class="mui-numbox" data-numbox-min="0">
+							  <!-- "-"按钮，点击可减小当前数值 -->
+							  <button class="mui-btn mui-numbox-btn-minus" type="button">-</button>
+							  <input id="number" class="mui-numbox-input" type="number"/>
+							  <!-- "+"按钮，点击可增大当前数值 -->
+							  <button class="mui-btn mui-numbox-btn-plus" type="button">+</button>
+							</div>
+			        			<div id="controller-diy" class="mui-text-center">
+	            					<button id="confirm-diy" type="button" class="mui-btn mui-btn-blue mui-content-padded" style="width: 40%">
+									确定
+								</button>
+            					</div>
+			        		</div>
+			        </div>
+			    </div>
+			</div>
+		</div>
+	</body>
+	<script src="js/mui.min.js"></script>
+	<script src="js/common.js"></script>
+	<script src="js/mui.picker.js"></script>
+	<script src="js/mui.poppicker.js"></script>
+	<script>
+		document.getElementById("type").addEventListener("tap", function(){
+			var stationPicker = new mui.PopPicker();
+			var info = [{"text":"内存", "value": "memory"}, {"text":"硬盘", "value": "disk"}];
+			stationPicker.setData(info);
+			
+			var showStationPickerButton = document.getElementById('showStationPicker');
+			var stationResult = document.getElementById('stationResult');
+			stationPicker.show(function(items) {
+				document.getElementById("type").value = items[0]['text'];
+				document.getElementById("type-value").value = items[0]['value'];
+				console.log(document.getElementById("type-value").value);
+			});
+		});
+		
+		document.getElementById("model").addEventListener("tap", function(){
+			var type = document.getElementById("type").value;//获取配件类型
+			var typeValue = document.getElementById("type-value").value;//获取配件类型值;
+			console.log(typeValue);
+			if(type.length <= 0){
+				mui.toast("请先选择配件类型！");
+				return;
+			}
+			var url = window.baseUrl + "?action=get_diy_dictionary&type=" + typeValue;
+			mui.post(url, {}, function(response){
+				response = JSON.parse(response);
+				if(response.status == 'true'){
+					var stationPicker = new mui.PopPicker();
+					stationPicker.setData(response.info);
+					
+					var showStationPickerButton = document.getElementById('showStationPicker');
+					var stationResult = document.getElementById('stationResult');
+					stationPicker.show(function(items) {
+						document.getElementById("model").value = items[0]['text'];
+						document.getElementById()
+					});
+				} else {
+					mui.toast(response.info);
+				}
+			}, 'json');
+		});
+		
+		document.getElementById("confirm-diy").addEventListener("tap", function(){
+			var model = document.getElementById("model").value;//获取录入配件型号
+			if(model.length <= 0){
+				mui.toast("请选择入库配件！");
+				return;
+			}
+			var num = document.getElementById("number").value;//获取数量
+			if(num.length <= 0 || num == 0){
+				mui.toast("请填写数量！");
+				return;
+			}
+		});
+	</script>
+</html>

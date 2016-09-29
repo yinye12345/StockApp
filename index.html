@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+	<head>
+	    <meta charset="utf-8">
+	    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+	    <title></title>
+	    
+	    <link href="css/mui.min.css" rel="stylesheet"/>
+	    
+	</head>
+	<body>
+		<header class="mui-bar mui-bar-nav">
+		    <h1 class="mui-title">首页</h1>
+			<a id="add" class="mui-btn mui-btn-link mui-pull-right mui-icon-plusempty">新增</a>
+		</header>
+		<p class="progressbar"></p>
+		<div class="mui-content">
+			<div id="slider" class="mui-slider mui-fullscreen">
+			    <div class="mui-slider-indicator mui-segmented-control mui-segmented-control-inverted">
+			        <a class="mui-control-item mui-active" href="#computer">机器</a>
+			        <a class="mui-control-item" href="#parts">配件</a>
+			    </div>
+			    <div id="sliderProgressBar" class="mui-slider-progress-bar mui-col-xs-6"></div>
+			    <div id="content-group" class="mui-slider-group">
+			        <div id="computer" class="mui-slider-item mui-control-content mui-active">
+			        		<div id="computer-content" style="overflow-y: auto;">
+			        			
+			        		</div>
+			        </div>
+			        <div id="parts" class="mui-slider-item mui-control-content">
+			        		<div id="parts-content" style="overflow-y: auto;">
+			        			
+			        		</div>
+			        </div>
+			    </div>
+			</div>
+		</div>
+	</body>
+	<script src="js/mui.min.js"></script>
+	<script src="js/common.js"></script>
+	<script>
+		var contentGroup = document.getElementById("content-group").offsetHeight;
+		document.getElementById("computer-content").style.height = contentGroup + "px";
+		document.getElementById("parts-content").style.height = contentGroup + "px";
+		
+		document.getElementById("add").addEventListener("tap", function(){
+			var add = plus.webview.create("add.html", "add");
+			add.show();
+		});
+		
+		var url = window.baseUrl;
+		
+		var computerTemplate = '<div class="mui-table-view-cell computer-cell">' +
+								'	<input style="display: none" value="{:f_id}">' +
+								'	<span>{:name}</span>' +
+								'	<span class="mui-badge mui-badge-primary">{:num}</span>' +
+								'</div>';
+		
+		var diyTemplate = '<div class="mui-table-view-cell parts-cell">' +
+								'	<input style="display: none" value="{:f_id}">' +
+								'	<span>{:name}</span>' +
+								'	<span class="mui-badge mui-badge-primary">{:num}</span>' +
+								'</div>';
+		
+		mui.plusReady(function(){
+			var url = window.baseUrl + "?action=get_stock&type=pc";
+//			var requestData = {"action": "get_stock", "type": "pc"};
+			var className = "#computer-content";
+			loadDataForList(url, {}, className, computerTemplate);
+			
+			//tab栏滑动事件
+			document.getElementById("slider").addEventListener("slide", function(e){
+				if (e.detail.slideNumber == 0){
+					var url = window.baseUrl + "?action=get_stock&type=pc";
+					console.log(url);
+					var className = "#computer-content";
+					loadDataForList(url, {}, className, computerTemplate);
+				} else if (e.detail.slideNumber == 1) {
+					var url = window.baseUrl + "?action=get_stock&type=diy";
+					var className = "#parts-content";
+					loadDataForList(url, {}, className, computerTemplate);
+				}
+			});
+			
+			mui("#computer-content").on("tap", ".computer-cell", function(){
+				var fId = (this).children[0].value;//获取机器编号
+				var detail = plus.webview.create("detail.html", "detail", {}, {"fId": fId});
+				detail.show();
+			});
+		});
+		
+		
+		
+		
+		
+	</script>
+</html>

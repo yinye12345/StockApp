@@ -1,0 +1,126 @@
+<!doctype html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<link href="css/mui.min.css" rel="stylesheet" />
+		<link href="css/mui.picker.css" rel="stylesheet" />
+		<link href="css/mui.poppicker.css" rel="stylesheet" />
+	</head>
+
+	<body>
+		<header class="mui-bar mui-bar-nav">
+		    <a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>
+		    <h1 class="mui-title">详情</h1>
+		</header>
+		<div class="mui-content mui-card mui-table-view-cell">
+			<div id="content">
+				
+			</div>
+			<div>
+				<span>硬盘：</span>
+				<div>
+					<input id="disk" readonly="readonly" placeholder="请选择硬盘" />
+				</div>
+			</div>
+			<div>
+				<span>内存：</span>
+				<div>
+					<input id="memory" readonly="readonly" placeholder="请选择内存" />
+				</div>
+			</div>
+			<div id="controller" class="mui-text-center">
+	            	<button id="out" type="button" class="mui-btn mui-btn-blue mui-content-padded" style="width: 40%">
+					出货
+				</button>
+            </div>
+		</div>
+	</body>
+	<script src="js/mui.min.js"></script>
+	<script src="js/common.js"></script>
+	<script src="js/mui.picker.js"></script>
+	<script src="js/mui.poppicker.js"></script>
+	<script>
+		var fId = 0;
+		
+		function getPcInfo(fId){
+			var url = window.baseUrl + '?action=get_pc_info&id=' + fId;
+			mui.post(url, {}, function(response){
+				response = JSON.parse(response);
+				if (response.status == "true"){
+					var info = response.info;
+					var content = document.getElementById("content");
+					var contentInnerHtml = '<div class=""><span>型号：</span><div class="mui-pull-right"><span>'+info['name']+'</span></div></div><div><span>cpu：</span><div class="mui-pull-right"><span>'+info['cpu']+'</span></div></div><div><span>分辨率：</span><div class="mui-pull-right"><span>'+info['screen']+'</span></div></div><div><span>显卡：</span><div class="mui-pull-right"><span>'+info['graphics']+'</span></div></div><div><span>指纹：</span><div class="mui-pull-right"><span>'+info['fingerprint']+'</span></div></div>';
+					content.innerHTML = contentInnerHtml;
+				} else {
+					mui.toast(response.info);
+				}
+			}, 'json');
+		};
+		
+		mui.plusReady(function(){
+			var self = plus.webview.currentWebview();
+			fId = self.fId;
+			getPcInfo(fId);
+			
+			//选择硬盘按钮点击事件
+			document.getElementById("disk").addEventListener("tap", function(){
+				var url = window.baseUrl + "?action=get_diy&type=disk";
+				mui.post(url, {}, function(response){
+					response = JSON.parse(response);
+					if(response['status'] == 'true'){
+						var stationPicker = new mui.PopPicker();
+//						var stationPicker = new mui.PopPicker();
+						stationPicker.setData(response['info']);
+						
+						var showStationPickerButton = document.getElementById('showStationPicker');
+						var stationResult = document.getElementById('stationResult');
+						stationPicker.show(function(items) {
+							
+						});
+					} else {
+						mui.toast(response['info']);
+					}
+				}, 'json');
+			});
+			
+			//选择内存按钮点击事件
+			document.getElementById("memory").addEventListener("tap", function(){
+				var url = window.baseUrl + "?action=get_diy&type=memory";
+				mui.post(url, {}, function(response){
+					response = JSON.parse(response);
+					if(response['status'] == 'true'){
+						var stationPicker = new mui.PopPicker();
+						stationPicker.setData(response['info']);
+						
+						var showStationPickerButton = document.getElementById('showStationPicker');
+						var stationResult = document.getElementById('stationResult');
+						stationPicker.show(function(items) {
+							
+						});
+					} else {
+						mui.toast(response['info']);
+					}
+				}, 'json');
+			});
+			
+			//出货按钮点击事件
+			document.getElementById("out").addEventListener("tap", function(){
+				var disk = document.getElementById("disk").value;//获取硬盘数据
+				var memory = document.getElementById("memory").value;//获取内存数据
+				if(disk.length <= 0){
+					mui.toast("请选择硬盘!");
+					return;
+				}
+				if(memory.length <= 0){
+					mui.toast("请选择内存!");
+					return;
+				}
+			});
+			
+		});
+		
+	</script>
+</html>
